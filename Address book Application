@@ -1,0 +1,204 @@
+Contact.java
+
+public class Contact {
+    private String name;
+    private String phoneNumber;
+    private String emailAddress;
+
+    public Contact(String name, String phoneNumber, String emailAddress) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.emailAddress = emailAddress;
+    }
+
+    // Getters and setters
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+AddressBookView.java
+
+import java.util.Scanner;
+
+public class AddressBookView {
+    private Scanner scanner;
+
+    public AddressBookView() {
+        scanner = new Scanner(System.in);
+    }
+
+    public void displayMenu() {
+        System.out.println("1. Add a contact");
+        System.out.println("2. Update a contact");
+        System.out.println("3. Delete a contact");
+        System.out.println("4. Search contacts");
+        System.out.println("5. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    public Contact getContactDetails() {
+        System.out.print("Enter name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter phone number: ");
+        String phoneNumber = scanner.nextLine();
+        System.out.print("Enter email address: ");
+        String emailAddress = scanner.nextLine();
+        return new Contact(name, phoneNumber, emailAddress);
+    }
+
+    public String getSearchCriteria() {
+        System.out.print("Enter search criteria: ");
+        return scanner.nextLine();
+    }
+
+    public void displayContact(Contact contact) {
+        System.out.println("Name: " + contact.getName());
+        System.out.println("Phone Number: " + contact.getPhoneNumber());
+        System.out.println("Email Address: " + contact.getEmailAddress());
+        System.out.println();
+    }
+
+    public void displayErrorMessage(String message) {
+        System.out.println("Error: " + message);
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+AddressBookController.java
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AddressBookController {
+    private List<Contact> contacts;
+    private AddressBookView view;
+
+    public AddressBookController(AddressBookView view) {
+        contacts = new ArrayList<>();
+        this.view = view;
+    }
+
+    public void start() {
+        int choice = 0;
+        do {
+            view.displayMenu();
+            choice = Integer.parseInt(new java.util.Scanner(System.in).nextLine());
+            switch (choice) {
+                case 1:
+                    addContact();
+                    break;
+                case 2:
+                    updateContact();
+                    break;
+                case 3:
+                    deleteContact();
+                    break;
+                case 4:
+                    searchContacts();
+                    break;
+                case 5:
+                    System.out.println("Exiting...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        } while (choice != 5);
+    }
+
+    private void addContact() {
+        Contact contact = view.getContactDetails();
+        contacts.add(contact);
+        System.out.println("Contact added successfully.\n");
+    }
+
+    private void updateContact() {
+        String searchCriteria = view.getSearchCriteria();
+        Contact contact = searchContact(searchCriteria);
+        if (contact != null) {
+            Contact updatedContact = view.getContactDetails();
+            contact.setName(updatedContact.getName());
+            contact.setPhoneNumber(updatedContact.getPhoneNumber());
+            contact.setEmailAddress(updatedContact.getEmailAddress());
+            System.out.println("Contact updated successfully.\n");
+        } else {
+            view.displayErrorMessage("Contact not found.");
+        }
+    }
+
+    private void deleteContact() {
+        String searchCriteria = view.getSearchCriteria();
+        Contact contact = searchContact(searchCriteria);
+        if (contact != null) {
+            contacts.remove(contact);
+            System.out.println("Contact deleted successfully.\n");
+        } else {
+            view.displayErrorMessage("Contact not found.");
+        }
+    }
+
+    private void searchContacts() {
+        String searchCriteria = view.getSearchCriteria();
+        List<Contact> searchResults = new ArrayList<>();
+        for (Contact contact : contacts) {
+            if (contact.getName().contains(searchCriteria) || contact.getPhoneNumber().contains(searchCriteria) ||
+                    contact.getEmailAddress().contains(searchCriteria)) {
+                searchResults.add(contact);
+            }
+        }
+        if (!searchResults.isEmpty()) {
+            for (Contact contact : searchResults) {
+                view.displayContact(contact);
+            }
+        } else {
+            view.displayErrorMessage("No contacts found.");
+        }
+    }
+
+    private Contact searchContact(String searchCriteria) {
+        for (Contact contact : contacts) {
+            if (contact.getName().equalsIgnoreCase(searchCriteria) || contact.getPhoneNumber().equals(searchCriteria) ||
+                    contact.getEmailAddress().equalsIgnoreCase(searchCriteria)) {
+                return contact;
+            }
+        }
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+Main.java
+
+public class Main {
+    public static void main(String[] args) {
+        AddressBookView view = new AddressBookView();
+        AddressBookController controller = new AddressBookController(view);
+        controller.start();
+    }
+}
